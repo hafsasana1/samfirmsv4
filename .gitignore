@@ -1,5 +1,5 @@
 ﻿.env
-.env.production
+# .env.production - Commented out to allow pushing template
 /vendor/
 /node_modules/
 /writable/cache/*
