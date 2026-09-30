@@ -1,0 +1,157 @@
+<?php
+
+namespace Config;
+
+use CodeIgniter\Config\BaseConfig;
+
+class App extends BaseConfig
+{
+    /**
+     * --------------------------------------------------------------------------
+     * Base Site URL - PRODUCTION VERSION
+     * --------------------------------------------------------------------------
+     *
+     * ⚠️ IMPORTANT: Change this to your actual domain!
+     * Must have trailing slash!
+     *
+     * Examples:
+     * - https://samfirms.com/
+     * - https://www.samfirms.com/
+     */
+    public string $baseURL = 'https://samfirms.com/';
+    // ^^^ CHANGE THIS TO YOUR DOMAIN!
+
+    /**
+     * Allowed Hostnames in the Site URL other than the hostname in the baseURL.
+     * Add www version if needed
+     *
+     * @var list<string>
+     */
+    public array $allowedHostnames = [
+        'www.samfirms.com', // Add www version if you use it
+    ];
+
+    /**
+     * --------------------------------------------------------------------------
+     * Index File
+     * --------------------------------------------------------------------------
+     *
+     * Should be empty string (index.php is hidden by .htaccess)
+     */
+    public string $indexPage = '';
+
+    /**
+     * --------------------------------------------------------------------------
+     * URI PROTOCOL
+     * --------------------------------------------------------------------------
+     */
+    public string $uriProtocol = 'REQUEST_URI';
+
+    /**
+     * --------------------------------------------------------------------------
+     * Permitted URI Characters
+     * --------------------------------------------------------------------------
+     *
+     * Regex character set allowed in URI
+     */
+    public string $permittedURIChars = 'a-z 0-9~%.:_\-';
+
+    /**
+     * --------------------------------------------------------------------------
+     * Default Locale
+     * --------------------------------------------------------------------------
+     */
+    public string $defaultLocale = 'en';
+
+    /**
+     * --------------------------------------------------------------------------
+     * Negotiate Locale
+     * --------------------------------------------------------------------------
+     */
+    public bool $negotiateLocale = false;
+
+    /**
+     * --------------------------------------------------------------------------
+     * Supported Locales
+     * --------------------------------------------------------------------------
+     */
+    public array $supportedLocales = ['en'];
+
+    /**
+     * --------------------------------------------------------------------------
+     * Application Timezone
+     * --------------------------------------------------------------------------
+     */
+    public string $appTimezone = 'UTC';
+
+    /**
+     * --------------------------------------------------------------------------
+     * Default Character Set
+     * --------------------------------------------------------------------------
+     */
+    public string $charset = 'UTF-8';
+
+    /**
+     * --------------------------------------------------------------------------
+     * URI PROTOCOL
+     * --------------------------------------------------------------------------
+     */
+    public bool $forceGlobalSecureRequests = false;
+
+    /**
+     * --------------------------------------------------------------------------
+     * Reverse Proxy IPs
+     * --------------------------------------------------------------------------
+     */
+    public array $proxyIPs = [];
+
+    /**
+     * --------------------------------------------------------------------------
+     * CSRF Protection
+     * --------------------------------------------------------------------------
+     *
+     * ✅ ENABLED for production security
+     */
+    public bool $CSRFProtection = true;
+    public string $CSRFTokenName = 'csrf_token_name';
+    public string $CSRFHeaderName = 'X-CSRF-TOKEN';
+    public string $CSRFCookieName = 'csrf_cookie_name';
+    public int $CSRFExpire = 7200;
+    public bool $CSRFRegenerate = true;
+    public bool $CSRFRedirect = true;
+    public string $CSRFSameSite = 'Lax';
+
+    /**
+     * --------------------------------------------------------------------------
+     * Cookie Settings
+     * --------------------------------------------------------------------------
+     *
+     * ✅ Secure cookies for HTTPS
+     */
+    public string $cookiePrefix = '';
+    public string $cookieDomain = '';
+    public string $cookiePath = '/';
+    public bool $cookieSecure = true;  // ✅ HTTPS only
+    public bool $cookieHTTPOnly = true; // ✅ XSS protection
+    public string $cookieSameSite = 'Lax';
+
+    /**
+     * --------------------------------------------------------------------------
+     * Session Settings
+     * --------------------------------------------------------------------------
+     */
+    public string $sessionDriver = 'CodeIgniter\Session\Handlers\FileHandler';
+    public string $sessionCookieName = 'ci_session';
+    public int $sessionExpiration = 7200;
+    public string $sessionSavePath = WRITEPATH . 'session';
+    public bool $sessionMatchIP = false;
+    public int $sessionTimeToUpdate = 300;
+    public bool $sessionRegenerateDestroy = false;
+
+    /**
+     * --------------------------------------------------------------------------
+     * Content Security Policy
+     * --------------------------------------------------------------------------
+     */
+    public bool $CSPEnabled = false;
+}

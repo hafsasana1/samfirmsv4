@@ -1,0 +1,16 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="300" height="50" viewBox="0 0 300 50">
+  <!-- Transparent background for dark sites -->
+  <rect width="300" height="50" fill="transparent"/>
+  
+  <!-- "Sam" text - WHITE -->
+  <text x="10" y="35" font-family="Arial, sans-serif" font-size="32" font-weight="600" fill="#FFFFFF">Sam</text>
+  
+  <!-- "F" text - ORANGE EMPHASIZED -->
+  <text x="80" y="35" font-family="Arial, sans-serif" font-size="38" font-weight="800" fill="#FF6B35">F</text>
+  
+  <!-- "ware" text - WHITE -->
+  <text x="110" y="35" font-family="Arial, sans-serif" font-size="32" font-weight="600" fill="#FFFFFF">ware</text>
+  
+  <!-- Tagline - Light Gray -->
+  <text x="10" y="48" font-family="Arial, sans-serif" font-size="9" font-weight="400" fill="#D1D5DB">Samsung Firmware Warehouse</text>
+</svg>

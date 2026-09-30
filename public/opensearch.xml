@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<OpenSearchDescription xmlns="http://a9.com/-/spec/opensearch/1.1/">
+  <ShortName>SamFirms</ShortName>
+  <Description>Search Samsung Firmware - Official Stock ROMs Download</Description>
+  <Tags>Samsung Firmware Download Stock ROM Galaxy</Tags>
+  <Contact>admin@samfirms.com</Contact>
+  <Url type="text/html" method="get" template="https://samfirms.com/load/model?query={searchTerms}"/>
+  <Url type="application/rss+xml" template="https://samfirms.com/feed"/>
+  <Image height="64" width="64" type="image/png">https://samfirms.com/resource/logo.png</Image>
+  <Image height="16" width="16" type="image/x-icon">https://samfirms.com/favicon.ico</Image>
+  <InputEncoding>UTF-8</InputEncoding>
+  <OutputEncoding>UTF-8</OutputEncoding>
+  <Language>en-us</Language>
+  <AdultContent>false</AdultContent>
+</OpenSearchDescription>

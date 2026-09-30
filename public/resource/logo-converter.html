@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Logo SVG to PNG Converter</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f5f5f5;
+            padding: 40px 20px;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2C3E50;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #7f8c8d;
+            margin-bottom: 30px;
+        }
+        .preview-section {
+            background: #2C3E50;
+            padding: 30px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        #logoCanvas {
+            background: #2C3E50;
+            border-radius: 5px;
+            max-width: 100%;
+        }
+        .controls {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
+        .control-group {
+            background: #f8f9fa;
+            padding: 15px;
+            border-radius: 8px;
+        }
+        .control-group label {
+            display: block;
+            color: #2C3E50;
+            font-weight: 600;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .control-group select,
+        .control-group input {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #e0e0e0;
+            border-radius: 5px;
+            font-size: 14px;
+        }
+        .btn {
+            display: inline-block;
+            padding: 15px 30px;
+            background: #FF6B35;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            text-decoration: none;
+            margin-right: 10px;
+        }
+        .btn:hover {
+            background: #E85A2A;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(255, 107, 53, 0.3);
+        }
+        .btn-secondary {
+            background: #2C3E50;
+        }
+        .btn-secondary:hover {
+            background: #1a252f;
+        }
+        .info-box {
+            background: #e3f2fd;
+            border-left: 4px solid #2196F3;
+            padding: 15px;
+            margin-top: 20px;
+            border-radius: 5px;
+        }
+        .info-box h3 {
+            color: #1976D2;
+            margin-bottom: 10px;
+            font-size: 16px;
+        }
+        .info-box p {
+            color: #555;
+            line-height: 1.6;
+            margin-bottom: 8px;
+        }
+        .success-message {
+            background: #4CAF50;
+            color: white;
+            padding: 15px;
+            border-radius: 8px;
+            margin-top: 20px;
+            display: none;
+            text-align: center;
+            font-weight: 600;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎨 SamFware Logo Converter</h1>
+        <p class="subtitle">Convert SVG logo to PNG format with custom size</p>
+
+        <!-- Preview -->
+        <div class="preview-section">
+            <canvas id="logoCanvas" width="400" height="60"></canvas>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+            <div class="control-group">
+                <label>Width (px)</label>
+                <input type="number" id="widthInput" value="400" min="100" max="2000">
+            </div>
+            <div class="control-group">
+                <label>Height (px)</label>
+                <input type="number" id="heightInput" value="60" min="50" max="500">
+            </div>
+            <div class="control-group">
+                <label>Background</label>
+                <select id="bgSelect">
+                    <option value="transparent">Transparent</option>
+                    <option value="#2C3E50">Navy Blue (Header)</option>
+                    <option value="#FFFFFF">White</option>
+                    <option value="#000000">Black</option>
+                </select>
+            </div>
+            <div class="control-group">
+                <label>Quality</label>
+                <select id="qualitySelect">
+                    <option value="1">Standard (1x)</option>
+                    <option value="2" selected>High (2x)</option>
+                    <option value="3">Ultra (3x)</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Buttons -->
+        <div style="text-align: center;">
+            <button class="btn" onclick="updatePreview()">🔄 Update Preview</button>
+            <button class="btn" onclick="downloadPNG()">⬇️ Download PNG</button>
+            <button class="btn btn-secondary" onclick="copyToClipboard()">📋 Copy Image</button>
+        </div>
+
+        <div id="successMessage" class="success-message">
+            ✅ PNG downloaded successfully!
+        </div>
+
+        <!-- Info -->
+        <div class="info-box">
+            <h3>📋 Instructions:</h3>
+            <p><strong>1.</strong> Adjust width, height, background, and quality settings above</p>
+            <p><strong>2.</strong> Click "Update Preview" to see changes</p>
+            <p><strong>3.</strong> Click "Download PNG" to save the file</p>
+            <p><strong>4.</strong> Upload the PNG to Admin → Settings → Web → Logo</p>
+        </div>
+
+        <div class="info-box" style="background: #fff3e0; border-left-color: #FF6B35;">
+            <h3>💡 Recommended Settings:</h3>
+            <p><strong>Header Logo:</strong> 400×60px, Transparent background, High quality (2x)</p>
+            <p><strong>Favicon:</strong> 64×64px, Transparent background, Standard quality (1x)</p>
+            <p><strong>Social Media:</strong> 1200×630px, Navy Blue background, Ultra quality (3x)</p>
+        </div>
+    </div>
+
+    <script>
+        // Logo SVG content
+        const logoSVG = `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 60" width="400" height="60">
+  <defs>
+    <style>
+      .logo-text {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        font-weight: 700;
+        font-size: 36px;
+        letter-spacing: -0.5px;
+      }
+      .text-white { fill: #FFFFFF; }
+      .text-orange { fill: #FF6B35; }
+    </style>
+  </defs>
+  
+  <!-- Orange Gear (6 teeth) -->
+  <path d="M 30,5 L 35,7 L 40,5 L 42,10 L 47,10 L 50,15 L 55,15 L 55,20 L 52,25 L 55,30 L 55,35 L 52,40 L 55,45 L 55,50 L 50,50 L 47,55 L 42,55 L 40,60 L 35,58 L 30,60 L 28,55 L 23,55 L 20,50 L 15,50 L 15,45 L 18,40 L 15,35 L 15,30 L 18,25 L 15,20 L 15,15 L 20,15 L 23,10 L 28,10 Z" 
+        fill="#FF5722" stroke="#D84315" stroke-width="2.5"/>
+  
+  <!-- Center Circle -->
+  <circle cx="30" cy="30" r="14" fill="#FFEB3B" stroke="#F57F17" stroke-width="2"/>
+  
+  <!-- Yellow Wrench in center -->
+  <path d="M 25,26 L 27,24 L 29,26 L 29,28 L 31,28 L 31,30 L 29,30 L 29,32 L 31,34 L 33,34 L 35,36 L 33,38 L 31,36 L 29,36 L 27,34 L 27,32 L 25,32 Z" 
+        fill="#FDD835" stroke="#F57F17" stroke-width="1.5"/>
+  
+  <!-- Logo Text: "SamFware" -->
+  <text x="75" y="42" class="logo-text">
+    <tspan class="text-white">Sam</tspan><tspan class="text-orange">Fware</tspan>
+  </text>
+</svg>`;
+
+        function updatePreview() {
+            const canvas = document.getElementById('logoCanvas');
+            const ctx = canvas.getContext('2d');
+            const width = parseInt(document.getElementById('widthInput').value);
+            const height = parseInt(document.getElementById('heightInput').value);
+            const bg = document.getElementById('bgSelect').value;
+            const quality = parseInt(document.getElementById('qualitySelect').value);
+
+            // Set canvas size with quality multiplier
+            canvas.width = width * quality;
+            canvas.height = height * quality;
+            canvas.style.width = width + 'px';
+            canvas.style.height = height + 'px';
+
+            // Scale context for quality
+            ctx.scale(quality, quality);
+
+            // Clear canvas
+            ctx.clearRect(0, 0, width, height);
+
+            // Draw background
+            if (bg !== 'transparent') {
+                ctx.fillStyle = bg;
+                ctx.fillRect(0, 0, width, height);
+            }
+
+            // Create SVG image
+            const img = new Image();
+            const svgBlob = new Blob([logoSVG], { type: 'image/svg+xml;charset=utf-8' });
+            const url = URL.createObjectURL(svgBlob);
+
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, width, height);
+                URL.revokeObjectURL(url);
+            };
+
+            img.src = url;
+        }
+
+        function downloadPNG() {
+            const canvas = document.getElementById('logoCanvas');
+            const link = document.createElement('a');
+            link.download = 'logo-final.png';
+            link.href = canvas.toDataURL('image/png');
+            link.click();
+
+            // Show success message
+            const successMsg = document.getElementById('successMessage');
+            successMsg.style.display = 'block';
+            setTimeout(() => {
+                successMsg.style.display = 'none';
+            }, 3000);
+        }
+
+        function copyToClipboard() {
+            const canvas = document.getElementById('logoCanvas');
+            canvas.toBlob(function(blob) {
+                const item = new ClipboardItem({ 'image/png': blob });
+                navigator.clipboard.write([item]).then(function() {
+                    alert('✅ Logo copied to clipboard!');
+                }).catch(function(err) {
+                    alert('❌ Failed to copy. Please use Download button instead.');
+                });
+            });
+        }
+
+        // Initialize preview on load
+        window.onload = function() {
+            updatePreview();
+        };
+
+        // Auto-update on input change
+        document.getElementById('widthInput').addEventListener('input', updatePreview);
+        document.getElementById('heightInput').addEventListener('input', updatePreview);
+        document.getElementById('bgSelect').addEventListener('change', updatePreview);
+        document.getElementById('qualitySelect').addEventListener('change', updatePreview);
+    </script>
+</body>
+</html>

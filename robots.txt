@@ -1,0 +1,31 @@
+User-agent: *
+Allow: /
+
+# Block admin area from indexing
+Disallow: /app-admin/
+Disallow: /writable/
+Disallow: /system/
+Disallow: /vendor/
+
+# Block AJAX endpoints (no value for search engines)
+Disallow: */ajax*
+Disallow: */load/*
+
+# Block paginated and filtered URLs (prevent duplicate content)
+Disallow: *?record=*
+Disallow: *?page=*
+Disallow: *?bit=*
+Disallow: *?os=*
+Disallow: *?csc=*
+
+# Block search results page
+Disallow: */search*
+
+# Allow important resources
+Allow: /assets/
+Allow: /resource/
+Allow: /*.css$
+Allow: /*.js$
+
+# XML Sitemap location
+Sitemap: https://samfirms.com/sitemaps.xml

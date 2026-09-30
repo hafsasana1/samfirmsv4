@@ -1,0 +1,41 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 400 60" width="400" height="60">
+  <defs>
+    <style>
+      @keyframes spin {
+        from { transform: rotate(0deg); }
+        to { transform: rotate(360deg); }
+      }
+      .gear-icon {
+        animation: spin 8s linear infinite;
+        transform-origin: 30px 30px;
+      }
+      .logo-text {
+        font-family: 'Segoe UI', 'Arial', sans-serif;
+        font-weight: 700;
+        font-size: 36px;
+        letter-spacing: -0.5px;
+      }
+      .text-white { fill: #FFFFFF; }
+      .text-orange { fill: #FF6B35; }
+    </style>
+  </defs>
+  
+  <!-- Gear Icon with Animation (Using settings.png as reference) -->
+  <g class="gear-icon">
+    <!-- Orange Gear (6 teeth) -->
+    <path d="M 30,5 L 35,7 L 40,5 L 42,10 L 47,10 L 50,15 L 55,15 L 55,20 L 52,25 L 55,30 L 55,35 L 52,40 L 55,45 L 55,50 L 50,50 L 47,55 L 42,55 L 40,60 L 35,58 L 30,60 L 28,55 L 23,55 L 20,50 L 15,50 L 15,45 L 18,40 L 15,35 L 15,30 L 18,25 L 15,20 L 15,15 L 20,15 L 23,10 L 28,10 Z" 
+          fill="#FF5722" stroke="#D84315" stroke-width="2.5"/>
+    
+    <!-- Center Circle -->
+    <circle cx="30" cy="30" r="14" fill="#FFEB3B" stroke="#F57F17" stroke-width="2"/>
+    
+    <!-- Yellow Wrench in center -->
+    <path d="M 25,26 L 27,24 L 29,26 L 29,28 L 31,28 L 31,30 L 29,30 L 29,32 L 31,34 L 33,34 L 35,36 L 33,38 L 31,36 L 29,36 L 27,34 L 27,32 L 25,32 Z" 
+          fill="#FDD835" stroke="#F57F17" stroke-width="1.5"/>
+  </g>
+  
+  <!-- Logo Text: "SamFware" -->
+  <text x="75" y="42" class="logo-text">
+    <tspan class="text-white">Sam</tspan><tspan class="text-orange">Fware</tspan>
+  </text>
+</svg>

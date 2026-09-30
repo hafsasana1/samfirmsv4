@@ -1,0 +1,548 @@
+================================================================================
+  SAMFWARE - CRON JOBS SETUP GUIDE
+================================================================================
+
+This guide explains how to set up automated cron jobs for:
+1. Firmware Scraper (fetches new firmware data)
+2. Firmware Publisher (publishes scheduled posts)
+
+================================================================================
+  PREREQUISITES - RUN THESE FIRST ON LIVE SERVER
+================================================================================
+
+1. DATABASE MIGRATIONS
+   Run this command via SSH on your live server:
+   
+   cd /path/to/your/site
+   php spark migrate
+   
+   This creates required tables:
+   - fw_scraper_cache
+   - fw_scraper_log
+   - fw_scheduler_log
+   - Adds scheduler columns to fw_posts
+
+2. VERIFY TABLES EXIST
+   Run in phpMyAdmin or MySQL:
+   
+   SHOW TABLES LIKE 'fw_scraper%';
+   SHOW TABLES LIKE 'fw_scheduler%';
+   
+   You should see:
+   ✓ fw_scraper_cache
+   ✓ fw_scraper_log
+   ✓ fw_scheduler_log
+
+3. CHECK PHP EXTENSIONS
+   Create phpinfo.php and check these are enabled:
+   ✓ cURL
+   ✓ DOM
+   ✓ libxml
+   ✓ mbstring
+   ✓ mysqli
+
+================================================================================
+  CRON JOB #1: FIRMWARE SCRAPER
+================================================================================
+
+PURPOSE:
+Automatically scrapes new firmware from SXRom.com every 30 minutes
+
+URL TO CALL:
+https://yourdomain.com/firmware-scraper/scrape
+
+SCHEDULE:
+Every 30 minutes
+
+WHAT IT DOES:
+1. Fetches latest firmware list from SXRom.com
+2. Extracts device names, models, versions, CSC codes
+3. Matches with OdinRom.com for download links
+4. Creates new posts as "Draft" status
+5. Automatically triggers scheduler to assign publish times
+6. Logs everything to fw_scraper_log table
+
+CRON SYNTAX:
+*/30 * * * * curl -s "https://yourdomain.com/firmware-scraper/scrape" > /dev/null 2>&1
+
+WITH LOGGING:
+*/30 * * * * curl -s "https://yourdomain.com/firmware-scraper/scrape" >> /home/logs/scraper.log 2>&1
+
+================================================================================
+  CRON JOB #2: FIRMWARE PUBLISHER
+================================================================================
+
+PURPOSE:
+Publishes scheduled draft posts at their designated time
+
+URL TO CALL:
+https://yourdomain.com/firmware-scheduler/publish
+
+SCHEDULE:
+Every 5 minutes (for precise timing)
+
+WHAT IT DOES:
+1. Checks for posts where scheduledPublishTime <= NOW
+2. Publishes posts with priority (urgent → high → normal)
+3. Changes postStatus from 'Draft' to 'Active'
+4. Sets publishedAt timestamp
+5. Clears cache for immediate visibility
+6. Logs to fw_scheduler_log table
+
+CRON SYNTAX:
+*/5 * * * * curl -s "https://yourdomain.com/firmware-scheduler/publish" > /dev/null 2>&1
+
+WITH LOGGING:
+*/5 * * * * curl -s "https://yourdomain.com/firmware-scheduler/publish" >> /home/logs/publisher.log 2>&1
+
+================================================================================
+  HOW TO SET UP CRON JOBS (DIFFERENT HOSTING TYPES)
+================================================================================
+
+────────────────────────────────────────────────────────────────────────────
+  OPTION A: cPanel (Most Common Shared Hosting)
+────────────────────────────────────────────────────────────────────────────
+
+1. Login to your cPanel
+2. Go to "Advanced" section
+3. Click "Cron Jobs"
+4. Under "Add New Cron Job" section:
+
+   FOR SCRAPER:
+   ┌─────────────────────────────────────────────────┐
+   │ Common Settings: Custom                         │
+   │ Minute: */30                                    │
+   │ Hour: *                                         │
+   │ Day: *                                          │
+   │ Month: *                                        │
+   │ Weekday: *                                      │
+   │ Command:                                        │
+   │ /usr/bin/curl -s "https://yourdomain.com/       │
+   │ firmware-scraper/scrape" > /dev/null 2>&1       │
+   └─────────────────────────────────────────────────┘
+   
+   Click "Add New Cron Job"
+
+   FOR PUBLISHER:
+   ┌─────────────────────────────────────────────────┐
+   │ Common Settings: Custom                         │
+   │ Minute: */5                                     │
+   │ Hour: *                                         │
+   │ Day: *                                          │
+   │ Month: *                                        │
+   │ Weekday: *                                      │
+   │ Command:                                        │
+   │ /usr/bin/curl -s "https://yourdomain.com/       │
+   │ firmware-scheduler/publish" > /dev/null 2>&1    │
+   └─────────────────────────────────────────────────┘
+   
+   Click "Add New Cron Job"
+
+5. Done! You should see both cron jobs listed below
+
+────────────────────────────────────────────────────────────────────────────
+  OPTION B: Plesk Hosting
+────────────────────────────────────────────────────────────────────────────
+
+1. Login to Plesk Control Panel
+2. Go to "Websites & Domains"
+3. Click "Scheduled Tasks" (or "Cron Jobs")
+4. Click "Add Task"
+
+   FOR SCRAPER:
+   - Task Type: Run a command
+   - Command: curl -s "https://yourdomain.com/firmware-scraper/scrape"
+   - Schedule: 
+     * Minute: */30
+     * Hour: *
+     * Day: *
+     * Month: *
+     * Weekday: *
+   - Click OK
+
+   FOR PUBLISHER:
+   - Task Type: Run a command
+   - Command: curl -s "https://yourdomain.com/firmware-scheduler/publish"
+   - Schedule:
+     * Minute: */5
+     * Hour: *
+     * Day: *
+     * Month: *
+     * Weekday: *
+   - Click OK
+
+5. Done!
+
+────────────────────────────────────────────────────────────────────────────
+  OPTION C: SSH/VPS/Dedicated Server (Linux)
+────────────────────────────────────────────────────────────────────────────
+
+1. SSH into your server:
+   ssh username@yourserver.com
+
+2. Edit crontab:
+   crontab -e
+
+3. Add these two lines (paste into the editor):
+
+   # Firmware Scraper - Every 30 minutes
+   */30 * * * * curl -s "https://yourdomain.com/firmware-scraper/scrape" >> /var/log/scraper.log 2>&1
+
+   # Firmware Publisher - Every 5 minutes
+   */5 * * * * curl -s "https://yourdomain.com/firmware-scheduler/publish" >> /var/log/publisher.log 2>&1
+
+4. Save and exit:
+   - In nano: Press Ctrl+X, then Y, then Enter
+   - In vi/vim: Press Esc, then type :wq and press Enter
+
+5. Verify cron jobs are saved:
+   crontab -l
+
+6. Create log directory (if needed):
+   mkdir -p /var/log
+   chmod 755 /var/log
+
+7. Done!
+
+────────────────────────────────────────────────────────────────────────────
+  OPTION D: Using PHP CLI (More Secure)
+────────────────────────────────────────────────────────────────────────────
+
+If your server has PHP CLI access, use this method instead of curl:
+
+FOR SCRAPER:
+*/30 * * * * php /path/to/your/site/public/index.php firmware-scraper scrape >> /path/to/logs/scraper.log 2>&1
+
+FOR PUBLISHER:
+*/5 * * * * php /path/to/your/site/public/index.php firmware-scheduler publish >> /path/to/logs/publisher.log 2>&1
+
+Replace /path/to/your/site with your actual path like:
+/home/username/public_html
+/var/www/html/yoursite
+
+================================================================================
+  TESTING YOUR CRON JOBS (BEFORE WAITING)
+================================================================================
+
+Don't wait 30 minutes! Test manually first:
+
+1. TEST SCRAPER:
+   Open browser and go to:
+   https://yourdomain.com/firmware-scraper/scrape
+   
+   Expected Result:
+   - JSON response with success: true
+   - Shows total_scraped, total_inserted counts
+   - Takes 30-60 seconds to complete
+   
+   If error:
+   - Check database tables exist
+   - Check PHP extensions (cURL, DOM)
+   - Check error logs
+
+2. TEST PUBLISHER:
+   Open browser and go to:
+   https://yourdomain.com/firmware-scheduler/publish
+   
+   Expected Result:
+   - Shows "Published X posts" or "No posts to publish"
+   - Lists priority breakdown
+   
+3. CHECK LOGS IN ADMIN:
+   https://yourdomain.com/firmware-scraper/logs
+   https://yourdomain.com/fw-admin/scheduler-dashboard
+
+4. CHECK DATABASE:
+   Run in phpMyAdmin:
+   
+   -- Check scraped posts (should be Draft status)
+   SELECT postId, model, csc, postStatus, scrapedFrom, createdTime 
+   FROM fw_posts 
+   WHERE scrapedFrom IS NOT NULL 
+   ORDER BY postId DESC 
+   LIMIT 10;
+   
+   -- Check scheduler logs
+   SELECT * FROM fw_scheduler_log 
+   ORDER BY logId DESC 
+   LIMIT 20;
+
+================================================================================
+  HOW THE SYSTEM WORKS (WORKFLOW)
+================================================================================
+
+STEP 1: SCRAPER RUNS (Every 30 minutes)
+┌─────────────────────────────────────────┐
+│ 1. Fetch latest firmware from SXRom    │
+│ 2. Parse 50-100 firmware entries       │
+│ 3. Match with OdinRom download links   │
+│ 4. Create Draft posts in database      │
+│ 5. AUTO-RUN scheduler internally       │
+│ 6. Assign priorities + schedule times  │
+└─────────────────────────────────────────┘
+
+STEP 2: SCHEDULER ASSIGNS TIMES (Automatic)
+┌─────────────────────────────────────────┐
+│ • URGENT (new models): 0-2 hours        │
+│ • HIGH (popular models): 2-8 hours      │
+│ • NORMAL (variants): 8-48 hours         │
+│ • Adds random gaps (human-like)        │
+└─────────────────────────────────────────┘
+
+STEP 3: PUBLISHER RUNS (Every 5 minutes)
+┌─────────────────────────────────────────┐
+│ 1. Check: Any post due now?            │
+│ 2. If YES: Publish (Draft → Active)    │
+│ 3. Set publishedAt timestamp           │
+│ 4. Clear cache                         │
+│ 5. Log action                          │
+└─────────────────────────────────────────┘
+
+EXAMPLE TIMELINE:
+02:00 AM - Scraper runs → Finds 50 firmware → Creates 50 Drafts → Auto-schedules
+02:15 AM - Publisher runs → Publishes 3 urgent posts
+02:20 AM - Publisher runs → Publishes 1 high priority post
+04:30 AM - Scraper runs again → Finds 20 new firmware
+... continues automatically 24/7
+
+================================================================================
+  PRIORITY SYSTEM EXPLANATION
+================================================================================
+
+URGENT PRIORITY (Publish in 0-2 hours)
+• First time seeing this model
+• Brand new device launch
+• Example: Galaxy S25 first firmware
+
+HIGH PRIORITY (Publish in 2-8 hours)
+• Popular models: S series, Note series, Fold/Flip
+• US carriers (XAA, TMB, VZW, ATT)
+• Major regions (BTU, DBT)
+
+NORMAL PRIORITY (Publish in 8-48 hours)
+• Regular variants
+• Less popular regions
+• Minor updates
+
+The scheduler spreads posts naturally, never publishing too many at once.
+
+================================================================================
+  PUBLISHING SPEED CONTROL
+================================================================================
+
+You can control how fast posts publish in Admin Dashboard:
+
+SLOW MODE: 2-4 posts per day (48-hour spread)
+NORMAL MODE: 6-12 posts per day (24-hour spread) ← DEFAULT
+FAST MODE: 12-24 posts per day (12-hour spread)
+TURBO MODE: 24-48 posts per day (6-hour spread)
+
+Change this in:
+Admin → Scheduler Dashboard → Settings → Publishing Speed
+
+================================================================================
+  MONITORING & MAINTENANCE
+================================================================================
+
+CHECK SCRAPER STATUS:
+https://yourdomain.com/firmware-scraper/logs
+
+CHECK SCHEDULER DASHBOARD:
+https://yourdomain.com/fw-admin/scheduler-dashboard
+
+MANUAL CONTROLS IN ADMIN:
+• Auto-Schedule Now - Schedule all pending drafts immediately
+• Publish Next N - Publish next N posts right now (bypass schedule)
+• Re-randomize - Change schedule times with new random gaps
+• Bulk Priority - Change priority of multiple posts at once
+
+VIEW LOGS IN DATABASE:
+SELECT * FROM fw_scraper_log ORDER BY logId DESC LIMIT 50;
+SELECT * FROM fw_scheduler_log ORDER BY logId DESC LIMIT 50;
+
+CLEAR CACHE MANUALLY:
+https://yourdomain.com/firmware-scraper/clear-cache
+
+================================================================================
+  SECURITY RECOMMENDATIONS (OPTIONAL BUT RECOMMENDED)
+================================================================================
+
+1. ADD SECRET TOKEN TO URLS:
+   
+   Update cron jobs to include token:
+   https://yourdomain.com/firmware-scraper/scrape?token=YOUR_SECRET_TOKEN
+   https://yourdomain.com/firmware-scheduler/publish?token=YOUR_SECRET_TOKEN
+   
+   Then add validation in controllers:
+   if ($this->request->getGet('token') !== 'YOUR_SECRET_TOKEN') {
+       exit('Unauthorized');
+   }
+
+2. RESTRICT BY IP (in .htaccess):
+   
+   <FilesMatch "^(firmware-scraper|firmware-scheduler)">
+       Order Deny,Allow
+       Deny from all
+       Allow from YOUR_SERVER_IP
+   </FilesMatch>
+
+3. USE HTTPS ONLY (already done if you have SSL)
+
+4. MONITOR LOGS REGULARLY
+   Check for errors weekly
+
+================================================================================
+  TROUBLESHOOTING COMMON ISSUES
+================================================================================
+
+ISSUE: Scraper returns "Whoops" error
+FIX:
+• Run migrations: php spark migrate
+• Check tables exist in database
+• Enable PHP extensions: cURL, DOM, mbstring
+• Check error logs
+
+ISSUE: Publisher doesn't publish anything
+FIX:
+• Check if posts have scheduledPublishTime set
+• Verify posts are in Draft status
+• Check if scheduledPublishTime <= current time
+• Look at fw_scheduler_log table for errors
+
+ISSUE: Posts not showing on frontend after publish
+FIX:
+• Clear browser cache (Ctrl + Shift + R)
+• Clear site cache: rm -rf writable/cache/*
+• Check postStatus is 'Active' not 'Draft'
+• Verify publishedAt timestamp is set
+
+ISSUE: Scraper finds 0 firmware
+FIX:
+• SXRom.com might be down (check manually)
+• HTML structure changed (scraper needs update)
+• IP blocked by SXRom (change user-agent or use proxy)
+
+ISSUE: Too many posts publishing at once
+FIX:
+• Go to Scheduler Dashboard → Settings
+• Change Publishing Speed to SLOW or NORMAL
+• Click Re-randomize to spread posts out more
+
+ISSUE: Cron jobs not running
+FIX:
+• Check cron is enabled: service cron status
+• Verify crontab syntax: crontab -l
+• Check server time zone matches your settings
+• Look at mail logs: cat /var/mail/username
+
+================================================================================
+  COMPLETE CRON CONFIGURATION (COPY-PASTE READY)
+================================================================================
+
+# ============================================
+# SAMFWARE FIRMWARE AUTOMATION SYSTEM
+# ============================================
+# Scraper: Fetch new firmware every 30 minutes
+# Publisher: Publish scheduled posts every 5 minutes
+# ============================================
+
+# Firmware Scraper - Every 30 minutes (48 times daily)
+*/30 * * * * curl -s "https://yourdomain.com/firmware-scraper/scrape" >> /home/logs/scraper.log 2>&1
+
+# Firmware Publisher - Every 5 minutes (288 times daily)
+*/5 * * * * curl -s "https://yourdomain.com/firmware-scheduler/publish" >> /home/logs/publisher.log 2>&1
+
+# Optional: Clean old logs monthly (keep last 30 days)
+0 0 1 * * find /home/logs -name "*.log" -mtime +30 -delete
+
+# Optional: Daily database optimization (runs at 3 AM)
+0 3 * * * curl -s "https://yourdomain.com/admin/optimize-database" > /dev/null 2>&1
+
+================================================================================
+  FINAL CHECKLIST BEFORE GOING LIVE
+================================================================================
+
+[ ] Step 1: Run migrations on live server
+[ ] Step 2: Verify all tables exist
+[ ] Step 3: Test scraper manually (visit URL in browser)
+[ ] Step 4: Test publisher manually (visit URL in browser)
+[ ] Step 5: Set up Scraper cron job (every 30 minutes)
+[ ] Step 6: Set up Publisher cron job (every 5 minutes)
+[ ] Step 7: Wait 30 minutes and check logs
+[ ] Step 8: Verify new posts appear in admin as Drafts
+[ ] Step 9: Wait for scheduled time and verify posts publish
+[ ] Step 10: Check frontend - new posts visible to users
+
+EXPECTED RESULTS AFTER 24 HOURS:
+• Scraper runs: 48 times (every 30 min)
+• Publisher runs: 288 times (every 5 min)
+• New firmware posts: 50-200 drafts created
+• Published posts: 6-24 (depending on priority and speed setting)
+• Zero errors in logs
+
+================================================================================
+  SUPPORT & DOCUMENTATION
+================================================================================
+
+If you encounter issues:
+
+1. Check error logs first:
+   - Scraper logs: https://yourdomain.com/firmware-scraper/logs
+   - Scheduler dashboard: https://yourdomain.com/fw-admin/scheduler-dashboard
+   - Server error log: tail -f /var/log/apache2/error.log
+
+2. Enable debug mode temporarily:
+   In .env file: CI_ENVIRONMENT = development
+
+3. Check database manually:
+   SELECT COUNT(*) FROM fw_posts WHERE scrapedFrom IS NOT NULL;
+   SELECT COUNT(*) FROM fw_posts WHERE postStatus = 'Draft';
+   SELECT COUNT(*) FROM fw_posts WHERE postStatus = 'Active';
+
+4. Test URLs directly:
+   curl -v "https://yourdomain.com/firmware-scraper/scrape"
+   curl -v "https://yourdomain.com/firmware-scheduler/publish"
+
+================================================================================
+  QUICK REFERENCE - CRON SYNTAX
+================================================================================
+
+* * * * * command
+│ │ │ │ │
+│ │ │ │ └─── Day of Week (0-7, Sunday=0 or 7)
+│ │ │ └───── Month (1-12)
+│ │ └─────── Day of Month (1-31)
+│ └───────── Hour (0-23)
+└─────────── Minute (0-59)
+
+EXAMPLES:
+*/5 * * * *     → Every 5 minutes
+*/30 * * * *    → Every 30 minutes
+0 * * * *       → Every hour (at minute 0)
+0 */6 * * *     → Every 6 hours
+0 2 * * *       → Daily at 2:00 AM
+0 0 * * 0       → Weekly on Sunday at midnight
+0 0 1 * *       → Monthly on 1st at midnight
+
+SPECIAL CHARACTERS:
+*   → Every (any value)
+*/X → Every X (interval)
+X-Y → Range (from X to Y)
+X,Y → List (X and Y)
+
+================================================================================
+  END OF GUIDE
+================================================================================
+
+Created by: Kiro AI
+Date: 2026-08-28
+Version: 1.0
+
+For questions or issues, check:
+- Admin Dashboard: https://yourdomain.com/fw-admin
+- Scheduler: https://yourdomain.com/fw-admin/scheduler-dashboard
+- Scraper Logs: https://yourdomain.com/firmware-scraper/logs
+
+Remember to replace "yourdomain.com" with your actual domain in all URLs!
+
+Good luck! 🚀

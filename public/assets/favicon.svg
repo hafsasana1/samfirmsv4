@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <!-- Dark background circle -->
+  <circle cx="256" cy="256" r="256" fill="#1F2937"/>
+  
+  <!-- "S" letter - WHITE -->
+  <text x="140" y="340" font-family="Arial, sans-serif" font-size="200" font-weight="800" fill="#FFFFFF">S</text>
+  
+  <!-- "F" letter - ORANGE -->
+  <text x="280" y="340" font-family="Arial, sans-serif" font-size="200" font-weight="800" fill="#FF6B35">F</text>
+</svg>

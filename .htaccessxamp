@@ -1,0 +1,91 @@
+Options -Indexes
+
+# ✅ TIER 2.5: Gzip Compression for faster delivery
+<IfModule mod_deflate.c>
+    AddOutputFilterByType DEFLATE text/plain
+    AddOutputFilterByType DEFLATE text/html
+    AddOutputFilterByType DEFLATE text/xml
+    AddOutputFilterByType DEFLATE text/css
+    AddOutputFilterByType DEFLATE text/javascript
+    AddOutputFilterByType DEFLATE application/xml
+    AddOutputFilterByType DEFLATE application/javascript
+    AddOutputFilterByType DEFLATE application/x-javascript
+    AddOutputFilterByType DEFLATE application/json
+    
+    # Exclude already compressed files
+    SetEnvIfNoCase Request_URI "\.(?:gif|jpe?g|png|zip|gz)$" no-gzip
+</IfModule>
+
+# ✅ TIER 2.6: Browser Caching Headers for better repeat visit performance
+<IfModule mod_expires.c>
+    ExpiresActive On
+    
+    # Images: 1 year cache
+    ExpiresByType image/jpeg "access plus 1 year"
+    ExpiresByType image/gif "access plus 1 year"
+    ExpiresByType image/png "access plus 1 year"
+    ExpiresByType image/webp "access plus 1 year"
+    ExpiresByType image/svg+xml "access plus 1 year"
+    ExpiresByType image/x-icon "access plus 1 year"
+    
+    # CSS/JS: 30 days cache (when versioned)
+    ExpiresByType text/css "access plus 30 days"
+    ExpiresByType text/javascript "access plus 30 days"
+    ExpiresByType application/javascript "access plus 30 days"
+    
+    # HTML: 1 hour cache
+    ExpiresByType text/html "access plus 1 hour"
+    
+    # Fonts: 1 year
+    ExpiresByType font/ttf "access plus 1 year"
+    ExpiresByType font/otf "access plus 1 year"
+    ExpiresByType font/woff "access plus 1 year"
+    ExpiresByType font/woff2 "access plus 1 year"
+    ExpiresByType application/font-woff "access plus 1 year"
+</IfModule>
+
+<IfModule mod_headers.c>
+    # Versioned assets: aggressive caching
+    <FilesMatch "\.(jpg|jpeg|png|gif|webp|ico|svg|eot|ttf|woff|woff2)$">
+        Header set Cache-Control "max-age=31536000, public, immutable"
+        Header set Vary "Accept"
+    </FilesMatch>
+    
+    # CSS/JS: 30 day cache when versioned
+    <FilesMatch "\.(css|js)$">
+        Header set Cache-Control "max-age=2592000, public"
+    </FilesMatch>
+    
+    # HTML: 1 hour cache
+    <FilesMatch "\.html?$">
+        Header set Cache-Control "max-age=3600, public"
+    </FilesMatch>
+    
+    # API responses: no cache
+    <FilesMatch "\.php$">
+        Header set Cache-Control "max-age=0, no-cache, no-store, must-revalidate"
+    </FilesMatch>
+</IfModule>
+
+<IfModule mod_rewrite.c>
+    RewriteEngine On
+    RewriteBase /sampro/
+
+    # If the requested file/folder exists directly, serve it as-is
+    RewriteCond %{REQUEST_FILENAME} -f [OR]
+    RewriteCond %{REQUEST_FILENAME} -d
+    RewriteRule ^ - [L]
+
+    # Transparently map /sampro/assets/* -> /sampro/public/assets/*
+    RewriteRule ^(assets/.*)$ public/$1 [L,QSA]
+
+    # Transparently map /sampro/resource/* -> /sampro/public/resource/*
+    RewriteRule ^(resource/.*)$ public/$1 [L,QSA]
+
+    # Route all other requests through CI4 front controller
+    RewriteRule ^(.*)$ index.php/$1 [L,NC,QSA]
+</IfModule>
+
+<IfModule !mod_rewrite.c>
+    ErrorDocument 404 /sampro/index.php
+</IfModule>
